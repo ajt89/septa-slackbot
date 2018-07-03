@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"regexp"
 
 	"golang.org/x/net/context"
 
@@ -13,14 +15,9 @@ func main() {
 	bot := slackbot.New(os.Getenv("SLACK_TOKEN"))
 
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
-	toMe.Hear("(?i)(hi|hello).*").MessageHandler(HelloHandler)
-	bot.Hear("(?)attachment").MessageHandler(AttachmentsHandler)
 	toMe.Hear(".*(train view).*").MessageHandler(TrainViewHandler)
+	toMe.Hear("train status .*").MessageHandler(TrainNumberHandler)
 	bot.Run()
-}
-
-func HelloHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	bot.Reply(evt, "Oh hello!", slackbot.WithTyping)
 }
 
 func TrainViewHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
@@ -40,19 +37,26 @@ func TrainViewHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Message
 	bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
 }
 
-func AttachmentsHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	txt := "Beep Beep Boop is a ridiculously simple hosting platform for your Slackbots."
+func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	msg := slackbot.MessageFromContext(ctx)
+	text := slackbot.StripDirectMention(msg.Text)
+	re := regexp.MustCompile("train status (?P<TrainNo>.+)")
+	trainStrArr := re.FindAllStringSubmatch(text, -1)[0]
+	trainNo := trainStrArr[1]
+	fmt.Printf(trainNo)
+	dataJson := GetTrainNo()
+	dataStr := string(dataJson)
+	fmt.Printf(dataStr)
+
 	attachment := slack.Attachment{
-		Pretext:   "We bring bots to life. :sunglasses: :thumbsup:",
-		Title:     "Host, deploy and share your bot in seconds.",
-		TitleLink: "https://beepboophq.com/",
-		Text:      txt,
-		Fallback:  txt,
-		ImageURL:  "https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png",
+		Pretext:   "Here is the train json",
+		Title:     "Train View",
+		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
+		Text:      dataStr,
+		Fallback:  dataStr,
 		Color:     "#7CD197",
 	}
 
-	// supports multiple attachments
 	attachments := []slack.Attachment{attachment}
 
 	bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
