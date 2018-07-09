@@ -71,7 +71,6 @@ func GetTrainView() string {
 
 // GetTrainNo retrieves data from septa based on train number
 func GetTrainNo(trainNo string) TrainNoStatus {
-	fmt.Println(trainNo)
 	funcStatus := TrainNoStatus{}
 	funcData := TrainNoData{}
 	response, err := netClient.Get("http://www3.septa.org/hackathon/TrainView/")
@@ -87,7 +86,6 @@ func GetTrainNo(trainNo string) TrainNoStatus {
 
 	var septaObjects []SeptaObject
 	json.Unmarshal(responseBody, &septaObjects)
-	fmt.Println(septaObjects)
 	for i := range septaObjects {
 		if septaObjects[i].Trainno == trainNo {
 			funcData.NextStop = septaObjects[i].Nextstop
@@ -95,9 +93,6 @@ func GetTrainNo(trainNo string) TrainNoStatus {
 			funcData.Dest = septaObjects[i].Dest
 			funcStatus.Data = funcData
 			funcStatus.Status = 0
-			fmt.Println(funcStatus.Status)
-			fmt.Println(funcData)
-			fmt.Println(funcStatus)
 			break
 		}
 	}
