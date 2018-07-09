@@ -14,26 +14,35 @@ var netClient = &http.Client{
 	Timeout: time.Second * 60,
 }
 
+// SeptaObject represents data sent back by SEPTA
 type SeptaObject struct {
-	Lat          string
-	Lon          string
-	Trainno      string
-	Service      string
-	Dest         string
-	Nextstop     string
-	Line         string
-	Consist      string
-	Heading      float32
-	Late         int
-	SOURCE       string
-	TRACK        string
-	TRACK_CHANGE string
+	Lat         string  `json:"lat"`
+	Lon         string  `json:"lon"`
+	Trainno     string  `json:"trainno"`
+	Service     string  `json:"service"`
+	Dest        string  `json:"dest"`
+	Nextstop    string  `json:"nextstop"`
+	Line        string  `json:"line"`
+	Consist     string  `json:"consist"`
+	Heading     float32 `json:"heading"`
+	Late        int     `json:"late"`
+	SOURCE      string  `json:"SOURCE"`
+	TRACK       string  `json:"TRACK"`
+	TRACKCHANGE string  `json:"TRACK_CHANGE"`
 }
 
-type Status struct {
-	errorMsg string
-	data     [3]string
-	status   int
+// TrainNoStatus allows functions to return status with error or data
+type TrainNoStatus struct {
+	ErrorMsg string
+	Data     TrainNoData
+	Status   int
+}
+
+// TrainNoData provides data return format
+type TrainNoData struct {
+	NextStop string
+	Late     string
+	Dest     string
 }
 
 func getJson(url string, target interface{}) error {
@@ -61,37 +70,41 @@ func GetTrainView() string {
 }
 
 // GetTrainNo retrieves data from septa based on train number
-func GetTrainNo(trainNo string) Status {
+func GetTrainNo(trainNo string) TrainNoStatus {
 	fmt.Println(trainNo)
-	funcStatus := Status{}
+	funcStatus := TrainNoStatus{}
+	funcData := TrainNoData{}
 	response, err := netClient.Get("http://www3.septa.org/hackathon/TrainView/")
 	defer response.Body.Close()
 	responseBody, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		funcStatus.errorMsg = "Error decoding response content"
-		funcStatus.status = 1
+		funcStatus.ErrorMsg = "Error decoding response content"
+		funcStatus.Data = funcData
+		funcStatus.Status = 1
 		return funcStatus
 	}
 
 	var septaObjects []SeptaObject
-	fmt.Println(string(responseBody))
 	json.Unmarshal(responseBody, &septaObjects)
 	fmt.Println(septaObjects)
-
-	var nextStop string
-	var late string
-	var dest string
 	for i := range septaObjects {
 		if septaObjects[i].Trainno == trainNo {
-			nextStop = septaObjects[i].Nextstop
-			late = strconv.Itoa(septaObjects[i].Late)
-			fmt.Println(late)
-			dest = septaObjects[i].Dest
-			funcStatus.data = [3]string{nextStop, late, dest}
-			funcStatus.status = 0
+			funcData.NextStop = septaObjects[i].Nextstop
+			funcData.Late = strconv.Itoa(septaObjects[i].Late)
+			funcData.Dest = septaObjects[i].Dest
+			funcStatus.Data = funcData
+			funcStatus.Status = 0
+			fmt.Println(funcStatus.Status)
+			fmt.Println(funcData)
+			fmt.Println(funcStatus)
 			break
 		}
+	}
+	if funcStatus.Data == (TrainNoData{}) {
+		funcStatus.ErrorMsg = fmt.Sprintf("Train %s was not found", trainNo)
+		funcStatus.Data = funcData
+		funcStatus.Status = 1
 	}
 
 	return funcStatus
