@@ -37,27 +37,30 @@ func TrainViewHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Message
 	bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
 }
 
+// TrainNumberHandler will retrieve data on a specific train number
 func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	msg := slackbot.MessageFromContext(ctx)
 	text := slackbot.StripDirectMention(msg.Text)
+
 	re := regexp.MustCompile("train status (?P<TrainNo>.+)")
 	trainStrArr := re.FindAllStringSubmatch(text, -1)[0]
 	trainNo := trainStrArr[1]
-	dataJson := GetTrainNo(trainNo)
+	bot.Reply(evt, fmt.Sprintf("Ok, looking for data on %s", trainNo), slackbot.WithTyping)
+
+	getTrainNoResponse := GetTrainNo(trainNo)
 	var returnText string
-	if dataJson.status == 1 {
-		returnText = dataJson.errorMsg
+
+	if getTrainNoResponse.Status == 1 {
+		returnText = getTrainNoResponse.ErrorMsg
 	} else {
-		nextStop := dataJson.data[0]
-		late := dataJson.data[1]
-		dest := dataJson.data[2]
+		nextStop := getTrainNoResponse.Data.NextStop
+		late := getTrainNoResponse.Data.Late
+		dest := getTrainNoResponse.Data.Dest
 		returnText = fmt.Sprintf("The next stop for train %s(%s) is %s and is %s minute(s) late", trainNo, dest, nextStop, late)
 	}
-	fmt.Println(returnText)
 
 	attachment := slack.Attachment{
-		Pretext:   "Here is the train json",
-		Title:     "Train View",
+		Title:     fmt.Sprintf("Train %s", trainNo),
 		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
 		Text:      returnText,
 		Fallback:  returnText,
