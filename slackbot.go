@@ -16,7 +16,7 @@ func main() {
 
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
 	toMe.Hear(".*(train view).*").MessageHandler(TrainViewHandler)
-	toMe.Hear("train status .*").MessageHandler(TrainNumberHandler)
+	toMe.Hear("(train status) .*").MessageHandler(TrainNumberHandler)
 	bot.Run()
 }
 
@@ -43,17 +43,24 @@ func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Messa
 	re := regexp.MustCompile("train status (?P<TrainNo>.+)")
 	trainStrArr := re.FindAllStringSubmatch(text, -1)[0]
 	trainNo := trainStrArr[1]
-	fmt.Printf(trainNo)
-	dataJson := GetTrainNo()
-	dataStr := string(dataJson)
-	fmt.Printf(dataStr)
+	dataJson := GetTrainNo(trainNo)
+	var returnText string
+	if dataJson.status == 1 {
+		returnText = dataJson.errorMsg
+	} else {
+		nextStop := dataJson.data[0]
+		late := dataJson.data[1]
+		dest := dataJson.data[2]
+		returnText = fmt.Sprintf("The next stop for train %s(%s) is %s and is %s minute(s) late", trainNo, dest, nextStop, late)
+	}
+	fmt.Println(returnText)
 
 	attachment := slack.Attachment{
 		Pretext:   "Here is the train json",
 		Title:     "Train View",
 		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
-		Text:      dataStr,
-		Fallback:  dataStr,
+		Text:      returnText,
+		Fallback:  returnText,
 		Color:     "#7CD197",
 	}
 
