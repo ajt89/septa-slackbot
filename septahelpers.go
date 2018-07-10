@@ -45,16 +45,6 @@ type TrainNoData struct {
 	Dest     string
 }
 
-func getJson(url string, target interface{}) error {
-	r, err := netClient.Get(url)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
-
-	return json.NewDecoder(r.Body).Decode(target)
-}
-
 // GetTrainView retrieves train view data from septa
 func GetTrainView() string {
 	response, err := netClient.Get("http://www3.septa.org/hackathon/TrainView/")
@@ -73,19 +63,32 @@ func GetTrainView() string {
 func GetTrainNo(trainNo string) TrainNoStatus {
 	funcStatus := TrainNoStatus{}
 	funcData := TrainNoData{}
-	response, err := netClient.Get("http://www3.septa.org/hackathon/TrainView/")
-	defer response.Body.Close()
-	responseBody, err := ioutil.ReadAll(response.Body)
+	response, requestError := netClient.Get("http://www3.septa.org/hackathon/TrainView/")
 
-	if err != nil {
-		funcStatus.ErrorMsg = "Error decoding response content"
+	if requestError != nil {
+		funcStatus.ErrorMsg = "Error requesting data"
+		funcStatus.Data = funcData
+		funcStatus = 1
+		return funcStatus
+	}
+
+	defer response.Body.Close()
+	responseBody, responseError := ioutil.ReadAll(response.Body)
+
+	if responseError != nil {
+		funcStatus.ErrorMsg = "Error reading response body"
 		funcStatus.Data = funcData
 		funcStatus.Status = 1
 		return funcStatus
 	}
 
 	var septaObjects []SeptaObject
-	json.Unmarshal(responseBody, &septaObjects)
+	jsonDecodeError := json.Unmarshal(responseBody, &septaObjects)
+
+	if jsonDecodeError != nil {
+		funcStatus.ErrorMsg = "Error decoding response body"
+	}
+
 	for i := range septaObjects {
 		if septaObjects[i].Trainno == trainNo {
 			funcData.NextStop = septaObjects[i].Nextstop
@@ -96,6 +99,7 @@ func GetTrainNo(trainNo string) TrainNoStatus {
 			break
 		}
 	}
+
 	if funcStatus.Data == (TrainNoData{}) {
 		funcStatus.ErrorMsg = fmt.Sprintf("Train %s was not found", trainNo)
 		funcStatus.Data = funcData
