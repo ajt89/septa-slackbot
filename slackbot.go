@@ -9,6 +9,8 @@ import (
 
 	slackbot "github.com/BeepBoopHQ/go-slackbot"
 	"github.com/nlopes/slack"
+
+	"github.com/ajt89/septa-slackbot/septa"
 )
 
 func main() {
@@ -21,7 +23,7 @@ func main() {
 }
 
 func TrainViewHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
-	data := GetTrainView()
+	data := septa.GetTrainView()
 	attachment := slack.Attachment{
 		Pretext:   "Here is the train data",
 		Title:     "Train View",
@@ -47,7 +49,7 @@ func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Messa
 	trainNo := trainStrArr[1]
 	bot.Reply(evt, fmt.Sprintf("Ok, looking for data on %s", trainNo), slackbot.WithTyping)
 
-	getTrainNoResponse := GetTrainNo(trainNo)
+	getTrainNoResponse := septa.GetTrainNo(trainNo)
 	var returnText string
 
 	if getTrainNoResponse.Status == 1 {
