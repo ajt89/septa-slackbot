@@ -22,38 +22,67 @@ func GetTrainView() string {
 
 // GetTrainNo retrieves data from septa based on train number
 func GetTrainNo(trainNo string) TrainNoStatus {
-	trainNoStatus := TrainNoStatus{}
+	status := TrainNoStatus{}
 	trainNoData := TrainNoData{}
 	requestStatus := GetHandler("http://www3.septa.org/hackathon/TrainView/")
 	if requestStatus.Status == 1 {
-		trainNoStatus.ErrorMsg = requestStatus.ErrorMsg
-		trainNoStatus.Status = requestStatus.Status
-		return trainNoStatus
+		status.ErrorMsg = requestStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
 	}
 
 	decodeStatus := TrainViewDecoder(requestStatus.Data)
 	if decodeStatus.Status == 1 {
-		trainNoStatus.ErrorMsg = decodeStatus.ErrorMsg
-		trainNoStatus.Status = requestStatus.Status
+		status.ErrorMsg = decodeStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
 	}
 
-	trainViewObject := decodeStatus.TrainViewData
+	trainViewArray := decodeStatus.TrainViewData
 
-	for i := range trainViewObject {
-		if trainViewObject[i].Trainno == trainNo {
-			trainNoData.NextStop = trainViewObject[i].Nextstop
-			trainNoData.Late = strconv.Itoa(trainViewObject[i].Late)
-			trainNoData.Dest = trainViewObject[i].Dest
-			trainNoStatus.Data = trainNoData
-			trainNoStatus.Status = 0
+	for i := range trainViewArray {
+		if trainViewArray[i].Trainno == trainNo {
+			trainNoData.NextStop = trainViewArray[i].Nextstop
+			trainNoData.Late = strconv.Itoa(trainViewArray[i].Late)
+			trainNoData.Dest = trainViewArray[i].Dest
+			status.Data = trainNoData
+			status.Status = 0
 			break
 		}
 	}
 
-	if trainNoStatus.Data == (TrainNoData{}) {
-		trainNoStatus.ErrorMsg = fmt.Sprintf("Train %s was not found", trainNo)
-		trainNoStatus.Status = 1
+	if status.Data == (TrainNoData{}) {
+		status.ErrorMsg = fmt.Sprintf("Train %s was not found", trainNo)
+		status.Status = 1
 	}
 
-	return trainNoStatus
+	return status
+}
+
+// GetAllTrainNos returns all train numbers and their destinations
+func GetAllTrainNos() GetAllTrainNoStatus {
+	status := GetAllTrainNoStatus{}
+	requestStatus := GetHandler("http://www3.septa.org/hackathon/TrainView/")
+	if requestStatus.Status == 1 {
+		status.ErrorMsg = requestStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
+	}
+
+	decodeStatus := TrainViewDecoder(requestStatus.Data)
+	if decodeStatus.Status == 1 {
+		status.ErrorMsg = decodeStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
+	}
+
+	var trainNumberArray []string
+	trainViewArray := decodeStatus.TrainViewData
+	for i := range trainViewArray {
+		indexValue := fmt.Sprintf("%s (%s)", trainViewArray[i].Trainno, trainViewArray[i].Dest)
+		trainNumberArray = append(trainNumberArray, indexValue)
+	}
+
+	status.Data = trainNumberArray
+	return status
 }

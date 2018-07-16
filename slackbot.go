@@ -1,11 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
-
-	"golang.org/x/net/context"
+	"strings"
 
 	slackbot "github.com/BeepBoopHQ/go-slackbot"
 	"github.com/nlopes/slack"
@@ -19,9 +19,11 @@ func main() {
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
 	toMe.Hear(".*(train view).*").MessageHandler(TrainViewHandler)
 	toMe.Hear("(train status) .*").MessageHandler(TrainNumberHandler)
+	toMe.Hear(".*(get all trains).*").MessageHandler(GetAllTrainNumbers)
 	bot.Run()
 }
 
+// TrainViewHandler returns the raw response from the TrainView endpoint
 func TrainViewHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
 	data := septa.GetTrainView()
 	attachment := slack.Attachment{
@@ -58,11 +60,37 @@ func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Messa
 		nextStop := getTrainNoResponse.Data.NextStop
 		late := getTrainNoResponse.Data.Late
 		dest := getTrainNoResponse.Data.Dest
-		returnText = fmt.Sprintf("The next stop for train %s(%s) is %s and is %s minute(s) late", trainNo, dest, nextStop, late)
+		returnText = fmt.Sprintf("The next stop for train %s (%s) is %s and is %s minute(s) late", trainNo, dest, nextStop, late)
 	}
 
 	attachment := slack.Attachment{
 		Title:     fmt.Sprintf("Train %s", trainNo),
+		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
+		Text:      returnText,
+		Fallback:  returnText,
+		Color:     "#7CD197",
+	}
+
+	attachments := []slack.Attachment{attachment}
+
+	bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
+}
+
+// GetAllTrainNumbers returns all train numbers
+func GetAllTrainNumbers(ct context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	bot.Reply(evt, "Ok, looking for all train numbers", slackbot.WithTyping)
+	getAllTrainNosResponse := septa.GetAllTrainNos()
+	var returnText string
+
+	if getAllTrainNosResponse.Status == 1 {
+		returnText = getAllTrainNosResponse.ErrorMsg
+	} else {
+		trainNumberArray := getAllTrainNosResponse.Data
+		returnText = fmt.Sprintf(strings.Join(trainNumberArray, ", "))
+	}
+
+	attachment := slack.Attachment{
+		Title:     "All current train numbers",
 		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
 		Text:      returnText,
 		Fallback:  returnText,

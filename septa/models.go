@@ -31,7 +31,7 @@ type TrainViewDecodeStatus struct {
 	TrainViewData []TrainViewObject
 }
 
-// TrainNoStatus allows functions to return status with error or data
+// TrainNoStatus response format for GetTrainNo
 type TrainNoStatus struct {
 	ErrorMsg string
 	Status   int
@@ -43,4 +43,11 @@ type TrainNoData struct {
 	NextStop string
 	Late     string
 	Dest     string
+}
+
+// GetAllTrainNoStatus response format for GetAllTrainNos
+type GetAllTrainNoStatus struct {
+	ErrorMsg string
+	Status   int
+	Data     []string
 }
