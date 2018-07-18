@@ -10,3 +10,6 @@ compile:
 run:
 	- export SLACK_TOKEN=$(SLACK_TOKEN); \
 	septa-slackbot
+
+build-docker:
+	- docker build -t ajt89/septa-slackbot .
