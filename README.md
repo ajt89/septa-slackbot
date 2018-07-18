@@ -13,3 +13,6 @@
 1. `$ make setup`
 2. `$ make compile`
 3. `$ make run`
+
+## Build and start the project in a docker image
+1. `$ make build-docker`
