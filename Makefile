@@ -13,3 +13,6 @@ run:
 
 build-docker:
 	- docker build -t ajt89/septa-slackbot .
+
+run-docker:
+	- docker run -e SLACK_TOKEN=$(SLACK_TOKEN) ajt89/septa-slackbot:latest
