@@ -16,3 +16,4 @@
 
 ## Build and start the project in a docker image
 1. `$ make build-docker`
+2. `$ make run-docker`
