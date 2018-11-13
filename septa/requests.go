@@ -12,7 +12,6 @@ func GetTrainView() string {
 	defer response.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	bodyString := string(bodyBytes)
-	fmt.Printf(bodyString)
 	if err == nil {
 		return bodyString
 	} else {
