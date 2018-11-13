@@ -85,3 +85,34 @@ func GetAllTrainNos() GetAllTrainNoStatus {
 	status.Data = trainNumberArray
 	return status
 }
+
+// GetAllTrainsNextToArrive returns all trains numbers and destinations next to arrive at a station
+func GetAllTrainsNextToArrive(stationName string) GetAllTrainNoStatus {
+	status := GetAllTrainNoStatus{}
+	requestStatus := GetHandler("http://www3.septa.org/hackathon/TrainView/")
+	if requestStatus.Status == 1 {
+		status.ErrorMsg = requestStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
+	}
+
+	decodeStatus := TrainViewDecoder(requestStatus.Data)
+	if decodeStatus.Status == 1 {
+		status.ErrorMsg = decodeStatus.ErrorMsg
+		status.Status = requestStatus.Status
+		return status
+	}
+
+	var trainNumberArray []string
+	trainViewArray := decodeStatus.TrainViewData
+	for i := range trainViewArray {
+		if trainViewArray[i].Nextstop == stationName {
+			indexValue := fmt.Sprintf("%s (%s)", trainViewArray[i].Trainno, trainViewArray[i].Dest)
+			trainNumberArray = append(trainNumberArray, indexValue)
+		}
+
+	}
+
+	status.Data = trainNumberArray
+	return status
+}
