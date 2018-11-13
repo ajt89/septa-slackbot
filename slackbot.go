@@ -19,6 +19,7 @@ func main() {
 	toMe := bot.Messages(slackbot.DirectMessage, slackbot.DirectMention).Subrouter()
 	toMe.Hear(".*(train view).*").MessageHandler(TrainViewHandler)
 	toMe.Hear("(train status) .*").MessageHandler(TrainNumberHandler)
+	toMe.Hear("(get trains next to arrive at) .*").MessageHandler(NextToArriveHandler)
 	toMe.Hear(".*(get all trains).*").MessageHandler(GetAllTrainNumbers)
 	bot.Run()
 }
@@ -65,6 +66,39 @@ func TrainNumberHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Messa
 
 	attachment := slack.Attachment{
 		Title:     fmt.Sprintf("Train %s", trainNo),
+		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
+		Text:      returnText,
+		Fallback:  returnText,
+		Color:     "#7CD197",
+	}
+
+	attachments := []slack.Attachment{attachment}
+
+	bot.ReplyWithAttachments(evt, attachments, slackbot.WithTyping)
+}
+
+// NextToArriveHandler returns all trains next to arrive at a given station
+func NextToArriveHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.MessageEvent) {
+	msg := slackbot.MessageFromContext(ctx)
+	text := slackbot.StripDirectMention(msg.Text)
+
+	re := regexp.MustCompile("get trains next to arrive at (?P<StationName>.+)")
+	stationStrArr := re.FindAllStringSubmatch(text, -1)[0]
+	stationName := stationStrArr[1]
+	bot.Reply(evt, fmt.Sprintf("Ok, looking for trains next to arrive at %s", stationName), slackbot.WithTyping)
+
+	getTrainNoResponse := septa.GetAllTrainsNextToArrive(stationName)
+	var returnText string
+
+	if getTrainNoResponse.Status == 1 {
+		returnText = getTrainNoResponse.ErrorMsg
+	} else {
+		trainNumberArray := getTrainNoResponse.Data
+		returnText = fmt.Sprintf(strings.Join(trainNumberArray, ", "))
+	}
+
+	attachment := slack.Attachment{
+		Title:     fmt.Sprintf("Trains Next to arrive at %s", stationName),
 		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
 		Text:      returnText,
 		Fallback:  returnText,
