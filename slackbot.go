@@ -89,16 +89,20 @@ func NextToArriveHandler(ctx context.Context, bot *slackbot.Bot, evt *slack.Mess
 
 	getTrainNoResponse := septa.GetAllTrainsNextToArrive(stationName)
 	var returnText string
+	var returnTitle string
 
 	if getTrainNoResponse.Status == 1 {
 		returnText = getTrainNoResponse.ErrorMsg
-	} else {
+	} else if len(getTrainNoResponse.Data) > 0 {
+		returnTitle = fmt.Sprintf("Trains Next to arrive at %s", stationName)
 		trainNumberArray := getTrainNoResponse.Data
-		returnText = fmt.Sprintf(strings.Join(trainNumberArray, ", "))
+		returnText = fmt.Sprintf(strings.Join(trainNumberArray, "\n "))
+	} else {
+		returnTitle = fmt.Sprintf("No trains next to arrive at %s", stationName)
 	}
 
 	attachment := slack.Attachment{
-		Title:     fmt.Sprintf("Trains Next to arrive at %s", stationName),
+		Title:     returnTitle,
 		TitleLink: "http://www3.septa.org/hackathon/TrainView/",
 		Text:      returnText,
 		Fallback:  returnText,
