@@ -10,9 +10,7 @@ spec:
     spec:
       containers:
       - name: septa-slackbot
-        image: ajt89/septa-slackbot
-        imagePullPolicy: Never
-        command:
+        image: ajt89/septa-slackbot:active
         ports:
           - containerPort: 8080
         env:

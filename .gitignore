@@ -57,7 +57,7 @@ Temporary Items
 .apdisk
 
 ### k8s ###
-local_secret.yml
+local_secret.yaml
 
 ### go-dep ###
 vendor
