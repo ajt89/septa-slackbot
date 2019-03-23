@@ -6,23 +6,27 @@ Currently implemented commands:
 - `get trains next to arrive at (station)` get trains next to arrive at a station
 - `get all trains` get all train numbers and their respective line
 
-# Local Installation
+======================================================================================
 
-## Prerequisites:
+## Local Installation
+
+### Prerequisites:
 - golang
 
-## Setup local.env
+### Setup local.env
 1. `$ cp local_env_template local.env`
 2. Fill in local.env settings
 
-## Start the project
+### Start the project
 1. `$ make setup`
 2. `$ make compile`
 3. `$ make run`
 
-# Running a Local Docker Image
+======================================================================================
 
-## Prerequisites:
+## Running a Local Docker Image
+
+### Prerequisites:
 - docker
 
 1. `$ cp local_env_template local.env`
@@ -30,9 +34,11 @@ Currently implemented commands:
 3. `$ make build-docker`
 4. `$ make run-docker`
 
-# Running in Kubernetes
+======================================================================================
 
-## Prerequisites
+## Running in Kubernetes
+
+### Prerequisites:
 - kubectl
 
 1. `$ cp k8s/secret_template.yaml k8s/secret.yaml`
