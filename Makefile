@@ -1,4 +1,5 @@
 include local.env
+tag = active
 
 setup:
 	- go get -d -v
@@ -17,7 +18,10 @@ coverage:
 	- go test github.com/ajt89/septa-slackbot/septa -cover
 
 build-docker:
-	- docker build -t ajt89/septa-slackbot .
+	-docker build -t ajt89/septa-slackbot:$(tag) .
+
+push-tag-docker:
+	-docker puish ajt89/septa-slackbot:$(tag)
 
 run-docker:
-	- docker run --rm -e SLACK_TOKEN=$(SLACK_TOKEN) ajt89/septa-slackbot:latest
+	- docker run --rm -e SLACK_TOKEN=$(SLACK_TOKEN) ajt89/septa-slackbot:$(tag)
