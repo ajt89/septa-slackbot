@@ -24,4 +24,4 @@ push-tag-docker:
 	-docker puish ajt89/septa-slackbot:$(tag)
 
 run-docker:
-	- docker run --rm -e SLACK_TOKEN=$(SLACK_TOKEN) ajt89/septa-slackbot:latest
+	- docker run --rm -e SLACK_TOKEN=$(SLACK_TOKEN) ajt89/septa-slackbot:$(tag)
