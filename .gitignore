@@ -55,3 +55,9 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+### k8s ###
+local_secret.yml
+
+### go-dep ###
+vendor
