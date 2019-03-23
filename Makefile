@@ -22,7 +22,7 @@ build-docker:
 	-docker build -t $(DOCKER_HOST)/septa-slackbot:$(TAG) .
 
 push-tag-docker:
-	-docker puish $(DOCKER_HOST)/septa-slackbot:$(TAG)
+	-docker push $(DOCKER_HOST)/septa-slackbot:$(TAG)
 
 run-docker:
 	- docker run --rm -e SLACK_TOKEN=$(SLACK_TOKEN) $(DOCKER_HOST)/septa-slackbot:$(TAG)
