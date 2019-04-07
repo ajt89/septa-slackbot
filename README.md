@@ -11,7 +11,8 @@ Currently implemented commands:
 ## Local Installation
 
 ### Prerequisites:
-- golang
+- [go](https://github.com/golang/go)
+- [dep](https://github.com/golang/dep)
 
 ### Setup local.env
 1. `$ cp local_env_template local.env`
@@ -27,7 +28,7 @@ Currently implemented commands:
 ## Running a Local Docker Image
 
 ### Prerequisites:
-- docker
+- [docker](https://docs.docker.com/install/)
 
 1. `$ cp local_env_template local.env`
 2. Fill in local.env settings
@@ -39,7 +40,7 @@ Currently implemented commands:
 ## Running in Kubernetes
 
 ### Prerequisites:
-- kubectl
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 1. `$ cp k8s/secret_template.yaml k8s/secret.yaml`
 2. `$ echo -n 'slack-token' | base64`
