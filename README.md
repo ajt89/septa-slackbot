@@ -6,7 +6,7 @@ Currently implemented commands:
 - `get trains next to arrive at (station)` get trains next to arrive at a station
 - `get all trains` get all train numbers and their respective line
 
-======================================================================================
+================================================================================
 
 ## Local Installation
 
@@ -23,7 +23,7 @@ Currently implemented commands:
 2. `$ make compile`
 3. `$ make run`
 
-======================================================================================
+================================================================================
 
 ## Running a Local Docker Image
 
@@ -35,7 +35,7 @@ Currently implemented commands:
 3. `$ make build-docker`
 4. `$ make run-docker`
 
-======================================================================================
+================================================================================
 
 ## Running in Kubernetes
 
